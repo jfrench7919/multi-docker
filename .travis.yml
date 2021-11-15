@@ -1,0 +1,22 @@
+sudo: required
+services:
+  - docker
+
+before_install:
+  - docker build -t jfrench7919/react-test -f ./client/Dockerfile.dev ./client
+
+script:
+  - docker run jfrench7919/react-test npm test -- --coverage
+
+after_success:
+  - docker build -t jfrench7919/multi-client ./client
+  - docker build -t jfrench7919/multi-nginx ./nginx
+  - docker build -t jfrench7919/multi-server ./server
+  - docker build -t jfrench7919/multi-worker ./worker
+  # Log into the docker CLI
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+  # Take those images and push them to docker hub
+  - docker push jfrench7919/multi-client
+  - docker push jfrench7919/multi-nginx
+  - docker push jfrench7919/multi-server
+  - docker push jfrench7919/multi-worker
