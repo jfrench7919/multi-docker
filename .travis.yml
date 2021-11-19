@@ -1,5 +1,6 @@
 sudo: required
 language: generic
+
 services:
   - docker
 
@@ -14,10 +15,22 @@ after_success:
   - docker build -t jfrench7919/multi-nginx ./nginx
   - docker build -t jfrench7919/multi-server ./server
   - docker build -t jfrench7919/multi-worker ./worker
-  # Log into the docker CLI
+  # Log in to the docker CLI
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
   # Take those images and push them to docker hub
   - docker push jfrench7919/multi-client
   - docker push jfrench7919/multi-nginx
   - docker push jfrench7919/multi-server
   - docker push jfrench7919/multi-worker
+
+deploy:
+  provider: elasticbeanstalk
+  region: "us-east-1"
+  app: "multi-docker"
+  env: "MultiDocker-env"
+  bucket_name: "elasticbeanstalk-us-east-1-923445559289"
+  bucket_path: "docker-multi"
+  on:
+    branch: main
+  access_key_id: $AWS_ACCESS_KEY
+  secret_access_key: $AWS_SECRET_KEY
